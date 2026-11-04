@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vinyls with Jelli</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Playfair Display & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            burgundy: {
+              800: '#58111A',
+              900: '#3D0A11',
+              950: '#26050A',
+            },
+            gold: {
+              300: '#FCE181',
+              400: '#F7D070',
+              500: '#D4AF37',
+              600: '#AA820A',
+              700: '#856404'
+            },
+            wood: {
+              600: '#8A5229',
+              700: '#6E3F1A',
+              800: '#532D10',
+              900: '#381C08'
+            }
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Stylings & Wood/Vinyl Effects */
+    body {
+      background: radial-gradient(circle at center, #1e1315 0%, #0a0607 100%);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* Gold Metallic Gradients & Effects */
+    .gold-metallic {
+      background: linear-gradient(135deg, #FFE89C 0%, #D4AF37 40%, #AA820A 80%, #FCE181 100%);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.6);
+    }
+    
+    .gold-text {
+      background: linear-gradient(135deg, #FFF0B3 0%, #D4AF37 50%, #997400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gold-border {
+      border-color: #D4AF37;
+    }
+
+    /* Vinyl Grooves Texture */
+    .vinyl-grooves {
+      background: 
+        radial-gradient(circle at center, transparent 32%, rgba(255,255,255,0.03) 33%, transparent 34%),
+        radial-gradient(circle at center, transparent 42%, rgba(255,255,255,0.04) 43%, transparent 44%),
+        radial-gradient(circle at center, transparent 52%, rgba(255,255,255,0.03) 53%, transparent 54%),
+        radial-gradient(circle at center, transparent 62%, rgba(255,255,255,0.04) 63%, transparent 64%),
+        radial-gradient(circle at center, transparent 72%, rgba(255,255,255,0.03) 73%, transparent 74%),
+        radial-gradient(circle at center, transparent 82%, rgba(255,255,255,0.04) 83%, transparent 84%),
+        radial-gradient(circle at center, #181818 0%, #0d0d0d 100%);
+    }
+
+    /* Vinyl Sheen Overlay */
+    .vinyl-sheen {
+      background: conic-gradient(
+        from 45deg,
+        rgba(255, 255, 255, 0.12) 0deg,
+        transparent 60deg,
+        rgba(255, 255, 255, 0.12) 180deg,
+        transparent 240deg,
+        rgba(255, 255, 255, 0.12) 360deg
+      );
+    }
+
+    /* Spinning Animation */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .spinning {
+      animation: spin 1.8s linear infinite;
+    }
+
+    /* Wooden Crate Texture */
+    .crate-wood {
+      background: #5c3214;
+      background-image: linear-gradient(90deg, rgba(255,255,255,.05) 50%, transparent 50%),
+                        linear-gradient(rgba(255,255,255,.03) 50%, transparent 50%);
+      background-size: 80px 80px, 4px 4px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.6);
+    }
+
+    .crate-slat {
+      background: linear-gradient(180deg, #6b3b18 0%, #4a270f 100%);
+      border: 1px solid #331908;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4);
+    }
+
+    /* Record Sleeve Stack Animation */
+    .sleeve-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+    }
+    
+    .sleeve-card:hover {
+      transform: translateY(-24px) scale(1.03) rotate(0deg) !important;
+      z-index: 50 !important;
+    }
+
+    /* Tonearm Assembly Styles - Positioned further to the right off the platter */
+    #tonearmContainer {
+      top: 35px;
+      right: -10px; /* Shifted further right to rest completely off the vinyl platter */
+    }
+
+    .tonearm-assembly {
+      transform-origin: 45px 45px;
+      transition: transform 0.05s ease-out;
+      touch-action: none;
+      cursor: grab;
+    }
+    .tonearm-assembly:active {
+      cursor: grabbing;
+    }
+
+    /* Custom Scrollbar for search */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D4AF37;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Header / Navigation Navbar -->
+  <header class="w-full bg-burgundy-950/80 backdrop-blur-md border-b border-gold-500/30 px-4 py-3 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+      <!-- Title & Branding -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full gold-metallic flex items-center justify-center text-burgundy-950 text-xl font-bold shadow-lg">
+          <i class="fa-solid font-bold fa-record-vinyl"></i>
+        </div>
+        <div>
+          <h1 class="font-cinzel text-xl md:text-2xl font-bold tracking-wider gold-text">Vinyls with Jelli</h1>
+          <p class="text-xs text-gold-300/70">Hi-Fi Audio Experience & Custom Vinyl Crate</p>
+        </div>
+      </div>
+
+      <!-- YouTube Music Search Input Bar -->
+      <div class="relative w-full md:w-96">
+        <div class="flex items-center bg-burgundy-900/90 border border-gold-500/50 rounded-full px-3 py-1.5 focus-within:border-gold-400 focus-within:ring-1 focus-within:ring-gold-400">
+          <i class="fa-solid fa-magnifying-glass text-gold-400 mr-2 text-sm"></i>
+          <input type="text" id="searchInput" placeholder="Search song or artist on YouTube..." 
+                 class="bg-transparent border-none text-sm text-white placeholder-gray-400 focus:outline-none w-full">
+          <button id="searchBtn" class="gold-metallic text-burgundy-950 font-bold text-xs px-3 py-1 rounded-full hover:brightness-110 transition">
+            Search
+          </button>
+        </div>
+        <!-- Search Results Dropdown -->
+        <div id="searchResults" class="hidden absolute left-0 right-0 top-12 bg-burgundy-950 border border-gold-500/40 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto p-2"></div>
+      </div>
+
+      <!-- Action Buttons (Fullscreen, Crackle, Info) -->
+  <div class="flex items-center gap-2">
+    <!-- Crackle Toggle -->
+    <button id="crackleToggle" title="Toggle Vinyl Crackle Audio" class="flex items-center gap-1.5 px-3 py-1.5 bg-burgundy-900/80 border border-gold-500/40 rounded-full text-xs font-medium text-gold-300 hover:bg-gold-500/20 transition">
+      <i class="fa-solid fa-compact-disc text-gold-400" id="crackleIcon"></i>
+      <span>Crackle: <strong id="crackleStatus" class="text-gray-400">OFF</strong></span>
+    </button>
+
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreenBtn" title="Toggle Fullscreen Mode" class="p-2 bg-burgundy-900/80 border border-gold-500/40 rounded-full text-gold-400 hover:bg-gold-500/20 transition">
+      <i class="fa-solid fa-expand"></i>
+    </button>
+  </div>
+</div>
+</header>
+
+<!-- Main Content Layout -->
+<main class="max-w-7xl mx-auto w-full flex-1 p-3 md:p-6 flex flex-col lg:flex-row items-center justify-center gap-8">
+  
+  <!-- LEFT: TURNTABLE SECTION -->
+  <section class="flex flex-col items-center justify-center w-full lg:w-1/2 max-w-lg relative">
+    
+    <!-- Audio Unlock Banner overlay if browser blocks autoplay -->
+    <div id="unlockBanner" class="hidden absolute top-12 z-50 bg-gold-500 text-burgundy-950 font-bold px-4 py-2 rounded-full shadow-2xl animate-bounce cursor-pointer flex items-center gap-2 border-2 border-white">
+      <i class="fa-solid fa-volume-high"></i>
+      <span>Click anywhere to enable sound!</span>
+    </div>
+
+    <!-- Status Badge / Drag Instruction -->
+    <div class="mb-3 w-full flex items-center justify-between px-2">
+      <span id="playerStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-burgundy-900/80 border border-gold-500/40 text-gold-300 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" id="statusDot"></span>
+        <span id="statusText">Drag Tonearm to Play Vinyl</span>
+      </span>
+      <span class="text-xs text-gold-400/80 italic hidden sm:inline"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag Needle onto Platter</span>
+    </div>
+
+    <!-- Main Burgundy & Gold Record Player Chassis -->
+    <div id="turntableBody" class="relative w-full aspect-square max-w-[460px] bg-gradient-to-br from-burgundy-800 via-burgundy-900 to-burgundy-950 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] border-4 border-burgundy-950 ring-1 ring-gold-500/40 flex flex-col justify-between overflow-hidden">
+      
+      <!-- Subtle Wood/Grit Grain Layer -->
+      <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+      <!-- Gold Corner Accent Brackets -->
+      <div class="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-gold-500/60 rounded-tl-lg pointer-events-none"></div>
+      <div class="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-gold-500/60 rounded-tr-lg pointer-events-none"></div>
+      <div class="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-gold-500/60 rounded-bl-lg pointer-events-none"></div>
+      <div class="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-gold-500/60 rounded-br-lg pointer-events-none"></div>
+
+      <!-- Gold Branding Badge -->
+      <div class="absolute top-4 left-1/2 -translate-x-1/2 gold-metallic px-4 py-0.5 rounded-sm shadow-md border border-gold-300/50">
+        <span class="font-cinzel text-[10px] tracking-widest text-burgundy-950 font-bold block text-center">JELLI HI-FI AUDIO</span>
+      </div>
+
+      <!-- Record Platter Area -->
+      <div class="relative w-full h-full flex items-center justify-center my-auto">
+        
+        <!-- Outer Gold Platter Rim -->
+        <div class="relative w-[82%] aspect-square rounded-full bg-gradient-to-tr from-gold-700 via-gold-400 to-gold-600 p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+          
+          <!-- Rubber Platter Mat -->
+          <div id="platter" class="w-full h-full rounded-full bg-neutral-900 relative flex items-center justify-center border-4 border-neutral-950 overflow-hidden">
+            
+            <!-- Spinning Vinyl Disc -->
+            <div id="vinylRecord" class="w-[96%] h-[96%] rounded-full vinyl-grooves relative flex items-center justify-center shadow-2xl cursor-pointer">
+              
+              <!-- Vinyl Metallic Reflective Sheen Layer -->
+              <div class="absolute inset-0 rounded-full vinyl-sheen opacity-60 pointer-events-none"></div>
+
+              <!-- Center Album Artwork Label -->
+              <div id="centerLabel" class="w-[38%] h-[38%] rounded-full bg-burgundy-900 border-4 border-neutral-900 shadow-inner relative overflow-hidden flex items-center justify-center">
+                <img id="activeArtwork" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=80" 
+                     alt="Album Artwork" class="w-full h-full object-cover">
+                <!-- Spindle Center Hole -->
+                <div class="absolute w-3 h-3 bg-neutral-950 rounded-full border-2 border-gold-400 shadow-md"></div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- UNIFIED SINGLE DRAGGABLE TONEARM ASSEMBLY (Shifted far right off platter) -->
+        <div id="tonearmContainer" class="absolute w-28 h-72 z-30 pointer-events-none">
+          
+          <!-- Draggable Group Container -->
+          <div id="tonearmAssembly" class="tonearm-assembly relative w-full h-full pointer-events-auto">
+            
+            <!-- Tonearm Base / Pivot Ring (Gold & Metallic) -->
+            <div class="absolute top-2 left-5 w-12 h-12 rounded-full gold-metallic border-2 border-gold-700 shadow-xl flex items-center justify-center">
+              <div class="w-7 h-7 rounded-full bg-neutral-800 border border-gold-400 flex items-center justify-center">
+                <div class="w-3 h-3 rounded-full bg-gold-400 shadow-inner"></div>
+              </div>
+              <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full gold-metallic border border-burgundy-950"></div>
+            </div>
+
+            <!-- Tonearm Metal Stem -->
+            <svg class="absolute top-8 left-9 w-20 h-52 pointer-events-none drop-shadow-md" viewBox="0 0 80 200" fill="none">
+              <path d="M 12 10 Q 15 70, 35 110 T 25 180" stroke="rgba(0,0,0,0.5)" stroke-width="6" fill="none" />
+              <path d="M 12 10 Q 15 70, 35 110 T 25 180" stroke="url(#goldGradient)" stroke-width="4.5" stroke-linecap="round" fill="none" />
+              
+              <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FFE89C" />
+                  <stop offset="50%" stop-color="#D4AF37" />
+                  <stop offset="100%" stop-color="#856404" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <!-- Headshell, Cartridge & Stylus -->
+            <div class="absolute bottom-3 left-5 w-7 h-10 gold-metallic rounded-sm shadow-lg border border-gold-700 flex flex-col items-center justify-between p-1 transform rotate-12">
+              <div class="w-full h-1 bg-burgundy-950 rounded-xs"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#f59e0b]"></div>
+            </div>
+
+            <div class="absolute top-28 left-9 w-4 h-8 bg-gold-700/30 border border-gold-500/50 rounded pointer-events-none -z-10"></div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Turntable Bottom Controls & Hardware Knobs -->
+      <div class="w-full flex items-center justify-between pt-2 border-t border-gold-500/20 z-10">
+        
+        <!-- Power Toggle / Cue Switch -->
+        <div class="flex items-center gap-3">
+          <button id="powerBtn" class="w-10 h-10 rounded-full bg-neutral-900 border-2 border-gold-500 flex items-center justify-center text-gold-400 hover:text-gold-300 active:scale-95 transition shadow-lg" title="Cue Needle On/Off Record">
+            <i class="fa-solid fa-power-off text-sm"></i>
+          </button>
+          <div class="text-[10px] font-mono text-gold-400/80 uppercase tracking-wider">
+            33 RPM<br><span id="rpmStatus" class="text-amber-400 font-bold">STOPPED</span>
+          </div>
+        </div>
+
+        <!-- Currently Playing Track Label Bar -->
+        <div class="flex-1 mx-4 text-center overflow-hidden">
+          <p id="nowPlayingTitle" class="text-xs font-semibold text-gold-300 truncate">Select or Search a Track</p>
+          <p id="nowPlayingArtist" class="text-[10px] text-gray-400 truncate">Vinyls with Jelli Collection</p>
+        </div>
+
+        <!-- Master Volume Knob & Slider -->
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-volume-high text-gold-400 text-xs"></i>
+          <input type="range" id="volumeSlider" min="0" max="100" value="80" 
+                 class="w-16 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-gold-500">
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RIGHT: CRATE VIEW & VINYL SELECTION WITH REMOVE RECORD BUTTON -->
+  <section class="w-full lg:w-1/2 flex flex-col items-center">
+    
+    <!-- Crate Header Title & Eject/Remove Record Button -->
+    <div class="w-full flex items-center justify-between mb-3 px-2 gap-2">
+      <h2 class="font-cinzel text-lg font-bold gold-text flex items-center gap-2">
+        <i class="fa-solid fa-boxes-packing text-gold-400"></i> Jelli's Record Crate
+      </h2>
+      
+      <div class="flex items-center gap-2">
+        <!-- REMOVE / EJECT RECORD BUTTON -->
+        <button id="removeRecordBtn" onclick="removeRecordFromTurntable()" class="gold-metallic text-burgundy-950 font-bold text-xs px-3 py-1.5 rounded-full hover:brightness-110 active:scale-95 transition shadow-md flex items-center gap-1.5">
+          <i class="fa-solid fa-eject text-xs"></i>
+          <span>Eject / Remove Record</span>
+        </button>
+        
+        <span id="crateCount" class="text-xs text-gold-300/80 bg-burgundy-900/60 px-2.5 py-1 rounded-full border border-gold-500/30">
+          4 Vinyls
+        </span>
+      </div>
+    </div>
+
+    <!-- Wooden Vinyl Crate Container -->
+    <div class="w-full h-[420px] crate-wood rounded-2xl p-4 relative flex flex-col justify-end border-4 border-wood-900 shadow-2xl overflow-hidden">
+      
+      <div class="absolute top-0 left-0 right-0 h-8 crate-slat opacity-80 z-20 flex items-center justify-around px-4 border-b border-wood-900">
+        <div class="w-2 h-2 rounded-full bg-gold-600 shadow-inner"></div>
+        <div class="w-2 h-2 rounded-full bg-gold-600 shadow-inner"></div>
+        <div class="w-2 h-2 rounded-full bg-gold-600 shadow-inner"></div>
+      </div>
+
+      <!-- Inside Crate: Interactive Stack of Vinyl Sleeves -->
+      <div id="crateStack" class="relative w-full h-[330px] flex items-center justify-center z-10 pt-6">
+        <!-- Dynamically populated sleeves -->
+      </div>
+
+      <!-- Crate Bottom Support Rail -->
+      <div class="absolute bottom-0 left-0 right-0 h-6 crate-slat z-20 flex items-center justify-between px-6 border-t border-wood-900">
+        <span class="text-[9px] font-mono text-gold-400/60 tracking-widest">HANDCRAFTED WOODEN CRATE</span>
+        <div class="flex gap-4">
+          <div class="w-1.5 h-1.5 rounded-full bg-gold-600"></div>
+          <div class="w-1.5 h-1.5 rounded-full bg-gold-600"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="text-xs text-gray-400 mt-3 text-center">
+      <i class="fa-solid fa-hand text-gold-400 mr-1"></i> Click any album cover in the crate to load it onto the turntable.
+    </p>
+
+  </section>
+
+</main>
+
+<!-- Visible YouTube Container (Off-screen / Minimal 1x1) to prevent iframe restrictions -->
+<div class="fixed -bottom-96 left-0 opacity-0 pointer-events-none">
+  <div id="ytPlayer"></div>
+</div>
+
+<!-- Footer -->
+<footer class="w-full text-center py-3 text-xs text-gold-400/60 border-t border-gold-500/20 bg-burgundy-950/90">
+  Vinyls with Jelli &copy; 2026 &bull; Interactive Vinyl & Audio Player
+</footer>
+
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<!-- Main Application Logic -->
+<script>
+  /* ==========================================================================
+     1. GLOBAL STATE & DEFAULT CURATED VINYL TRACKS
+     ========================================================================== */
+  const YOUTUBE_API_KEY = "AIzaSyBou0CUP6_2wl9YxRRIIZGs5EUxLpUMewY";
+
+  // Audio streams and synthesized audio engine for guaranteed sound playback
+  const AUDIO_STREAMS = [
+    "https://stream.zeno.fm/f3wvbbqmdg8uv", // Lofi Radio Stream
+    "https://stream.zeno.fm/0r0xa792kwzuv", // Jazz Lounge Stream
+    "https://stream.zeno.fm/z52ba2z41ceuv", // Chillbeat Radio
+    "https://stream.zeno.fm/4v3v09z1ceuv"  // Acoustic Chill Stream
+  ];
+
+  let playlist = [
+    {
+      id: "jfKfPfyJRdk",
+      title: "Lofi Beats - Synthwave Chill",
+      artist: "Lofi Records",
+      artwork: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80",
+      streamUrl: AUDIO_STREAMS[0]
+    },
+    {
+      id: "5qap5aO4i9A",
+      title: "Lofi Hip Hop Radio - Beats to Study",
+      artist: "ChilledCow Classic",
+      artwork: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80",
+      streamUrl: AUDIO_STREAMS[1]
+    },
+    {
+      id: "DWcJFNfaw9c",
+      title: "Vintage Acoustic Guitar Sessions",
+      artist: "Retro Acoustic",
+      artwork: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=500&auto=format&fit=crop&q=80",
+      streamUrl: AUDIO_STREAMS[2]
+    },
+    {
+      id: "9FvvbVI5rYA",
+      title: "Smooth Jazz Saxophone Ambient",
+      artist: "Jazz Vinyl Classics",
+      artwork: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
+      streamUrl: AUDIO_STREAMS[3]
+    }
+  ];
+
+  let currentTrackIndex = 0;
+  let isTrackLoaded = true;
+  let isPlaying = false;
+  let isTonearmOnRecord = false;
+  let ytPlayer = null;
+  let isYtReady = false;
+
+  // Direct Audio Element for fallback / stream playback
+  let directAudio = new Audio();
+  directAudio.crossOrigin = "anonymous";
+
+  // Web Audio Context for Vinyl Crackle
+  let audioCtx = null;
+  let crackleNode = null;
+  let crackleGain = null;
+  let isCrackleEnabled = false;
+
+  // Tonearm Position State
+  let isDraggingTonearm = false;
+  let tonearmAngle = 0;
+  const REST_ANGLE = 0;
+  const RECORD_MIN_ANGLE = 16;
+  const RECORD_MAX_ANGLE = 42;
+
+  function initAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const banner = document.getElementById('unlockBanner');
+    if (banner) banner.classList.add('hidden');
+  }
+
+  /* ==========================================================================
+     2. YOUTUBE PLAYER INTEGRATION & DIRECT AUDIO ENGINE
+     ========================================================================== */
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('ytPlayer', {
+      height: '200',
+      width: '200',
+      videoId: playlist[currentTrackIndex].id,
+      playerVars: {
+        'autoplay': 0,
+        'controls': 1,
+        'disablekb': 0,
+        'enablejsapi': 1,
+        'playsinline': 1,
+        'origin': window.location.origin
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange,
+        'onError': onPlayerError
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    isYtReady = true;
+    const vol = document.getElementById('volumeSlider').value;
+    if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+      ytPlayer.setVolume(vol);
+      ytPlayer.unMute();
+    }
+    updateNowPlayingUI();
+    if (isTonearmOnRecord && isTrackLoaded) {
+      startPlayback();
+    }
+  }
+
+  function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+      setPlayingUI(true);
+    } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.STOPPED) {
+      if (!isTonearmOnRecord) {
+        setPlayingUI(false);
+      }
+    } else if (event.data === YT.PlayerState.ENDED && isTonearmOnRecord && isTrackLoaded) {
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      loadTrack(currentTrackIndex, true);
+    }
+  }
+
+  function onPlayerError(event) {
+    console.warn("YouTube player restriction encountered, switching to direct stream audio.");
+    playFallbackAudio();
+  }
+
+  function playFallbackAudio() {
+    const track = playlist[currentTrackIndex];
+    if (track && track.streamUrl) {
+      directAudio.src = track.streamUrl;
+      directAudio.volume = document.getElementById('volumeSlider').value / 100;
+      directAudio.play().then(() => {
+        setPlayingUI(true);
+      }).catch(err => {
+        console.warn("Direct stream play error:", err);
+      });
+    }
+  }
+
+  /* ==========================================================================
+     3. CRATE VIEW RENDERING & RECORD REMOVAL
+     ========================================================================== */
+  function renderCrate() {
+    const crateStack = document.getElementById('crateStack');
+    document.getElementById('crateCount').innerText = `${playlist.length} Vinyls`;
+    crateStack.innerHTML = '';
+
+    playlist.forEach((track, index) => {
+      const sleeve = document.createElement('div');
+      sleeve.className = `sleeve-card absolute w-52 h-52 sm:w-60 sm:h-60 rounded-lg shadow-2xl cursor-pointer border-2 border-gold-500/30 overflow-hidden flex flex-col justify-between p-3 transition-all duration-300`;
+      
+      const offset = (index - (playlist.length / 2)) * 18;
+      const rotate = (index % 2 === 0 ? 1 : -1) * (index * 2);
+      
+      sleeve.style.transform = `translateX(${offset}px) translateY(${index * 4}px) rotate(${rotate}deg)`;
+      sleeve.style.zIndex = index + 1;
+      sleeve.style.background = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('${track.artwork}') center/cover`;
+
+      if (isTrackLoaded && index === currentTrackIndex) {
+        sleeve.classList.add('ring-4', 'ring-gold-400');
+      }
+
+      sleeve.innerHTML = `
+        <div class="flex justify-between items-start">
+          <span class="text-[9px] font-bold font-mono gold-metallic px-2 py-0.5 rounded text-burgundy-950 uppercase">STEREO LP</span>
+          <div class="flex items-center gap-1.5">
+            <button class="delete-sleeve-btn w-6 h-6 rounded-full bg-red-950/90 border border-red-500/60 text-red-400 hover:bg-red-800 hover:text-white transition flex items-center justify-center text-[10px]" title="Remove from Crate">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <span class="w-6 h-6 rounded-full bg-burgundy-950/80 border border-gold-400/60 flex items-center justify-center text-[10px] text-gold-400">
+              <i class="fa-solid fa-music"></i>
+            </span>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-white truncate drop-shadow">${escapeHtml(track.title)}</h3>
+          <p class="text-[10px] text-gold-300/80 truncate">${escapeHtml(track.artist)}</p>
+        </div>
+      `;
+
+      const deleteBtn = sleeve.querySelector('.delete-sleeve-btn');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteTrackFromCrate(index);
+      });
+
+      sleeve.addEventListener('click', () => {
+        initAudioContext();
+        loadTrack(index, isTonearmOnRecord);
+      });
+
+      crateStack.appendChild(sleeve);
+    });
+  }
+
+  function deleteTrackFromCrate(index) {
+    if (playlist.length <= 1) {
+      alert("You must keep at least one record in your crate!");
+      return;
+    }
+
+    const isCurrentActive = (index === currentTrackIndex);
+
+    playlist.splice(index, 1);
+
+    if (isCurrentActive) {
+      removeRecordFromTurntable();
+      currentTrackIndex = Math.min(index, playlist.length - 1);
+    } else if (index < currentTrackIndex) {
+      currentTrackIndex--;
+    }
+
+    renderCrate();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function loadTrack(index, shouldPlay = false) {
+    currentTrackIndex = index;
+    isTrackLoaded = true;
+    const track = playlist[currentTrackIndex];
+
+    const activeArt = document.getElementById('activeArtwork');
+    activeArt.src = track.artwork;
+    activeArt.style.display = 'block';
+
+    updateNowPlayingUI();
+    renderCrate();
+
+    if (track.streamUrl) {
+      directAudio.src = track.streamUrl;
+    }
+
+    if (isYtReady && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+      ytPlayer.loadVideoById(track.id);
+      if (!shouldPlay) {
+        ytPlayer.pauseVideo();
+        directAudio.pause();
+      } else {
+        startPlayback();
+      }
+    } else if (shouldPlay) {
+      startPlayback();
+    }
+  }
+
+  function removeRecordFromTurntable() {
+    setTonearmAngle(REST_ANGLE);
+    stopPlayback();
+
+    const activeArt = document.getElementById('activeArtwork');
+    activeArt.style.display = 'none';
+
+    isTrackLoaded = false;
+    document.getElementById('nowPlayingTitle').innerText = "No Record Loaded";
+    document.getElementById('nowPlayingArtist').innerText = "Select a Vinyl from Crate";
+    document.getElementById('statusText').innerText = "Load Record or Select Track";
+
+    renderCrate();
+  }
+
+  function updateNowPlayingUI() {
+    if (!isTrackLoaded) return;
+    const track = playlist[currentTrackIndex];
+    document.getElementById('nowPlayingTitle').innerText = track.title;
+    document.getElementById('nowPlayingArtist').innerText = track.artist;
+  }
+
+  /* ==========================================================================
+     4. UNIFIED DRAGGABLE TONEARM MECHANICS
+     ========================================================================== */
+  const tonearmAssembly = document.getElementById('tonearmAssembly');
+
+  function setTonearmAngle(angle) {
+    tonearmAngle = Math.max(-5, Math.min(45, angle));
+    tonearmAssembly.style.transform = `rotate(${tonearmAngle}deg)`;
+
+    const onRecord = tonearmAngle >= RECORD_MIN_ANGLE && tonearmAngle <= RECORD_MAX_ANGLE;
+    
+    if (onRecord !== isTonearmOnRecord) {
+      isTonearmOnRecord = onRecord;
+      if (isTonearmOnRecord && isTrackLoaded) {
+        startPlayback();
+      } else {
+        stopPlayback();
+      }
+    }
+  }
+
+  function handlePointerMove(e) {
+    if (!isDraggingTonearm) return;
+
+    const rect = tonearmAssembly.getBoundingClientRect();
+    const pivotX = rect.left + 35;
+    const pivotY = rect.top + 35;
+
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    const dx = clientX - pivotX;
+    const dy = clientY - pivotY;
+
+    let deg = Math.atan2(dy, dx) * (180 / Math.PI) - 60;
+    setTonearmAngle(deg);
+  }
+
+  function stopDragging() {
+    if (!isDraggingTonearm) return;
+    isDraggingTonearm = false;
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', stopDragging);
+    document.removeEventListener('touchmove', handlePointerMove);
+    document.removeEventListener('touchend', stopDragging);
+  }
+
+  tonearmAssembly.addEventListener('pointerdown', (e) => {
+    initAudioContext();
+    isDraggingTonearm = true;
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', stopDragging);
+  });
+
+  tonearmAssembly.addEventListener('touchstart', (e) => {
+    initAudioContext();
+    isDraggingTonearm = true;
+    document.addEventListener('touchmove', handlePointerMove, { passive: false });
+    document.addEventListener('touchend', stopDragging);
+  });
+
+  /* ==========================================================================
+     5. PLAYBACK & VINYL CRACKLE AUDIO CONTROLS
+     ========================================================================== */
+  function startPlayback() {
+    initAudioContext();
+    if (!isTrackLoaded) {
+      document.getElementById('statusText').innerText = "Please Load a Record First!";
+      return;
+    }
+
+    isPlaying = true;
+    setPlayingUI(true);
+
+    let ytStarted = false;
+    if (isYtReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+      try {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(document.getElementById('volumeSlider').value);
+        ytPlayer.playVideo();
+        ytStarted = true;
+      } catch (e) {
+        console.warn("YouTube play failed, using stream fallback:", e);
+      }
+    }
+
+    // Always attempt direct audio play as primary/secondary audio backing
+    const track = playlist[currentTrackIndex];
+    if (track && track.streamUrl) {
+      directAudio.src = track.streamUrl;
+      directAudio.volume = document.getElementById('volumeSlider').value / 100;
+      directAudio.play().catch(e => console.log("Stream autoplay waiting for gesture"));
+    }
+
+    if (isCrackleEnabled) {
+      playCrackleSound();
+    }
+  }
+
+  function stopPlayback() {
+    isPlaying = false;
+    setPlayingUI(false);
+
+    if (isYtReady && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+      try {
+        ytPlayer.pauseVideo();
+      } catch (e) {}
+    }
+
+    if (directAudio) {
+      directAudio.pause();
+    }
+
+    stopCrackleSound();
+  }
+
+  function setPlayingUI(active) {
+    if (active) {
+      document.getElementById('vinylRecord').classList.add('spinning');
+      document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+      document.getElementById('statusText').innerText = "Playing Vinyl...";
+      document.getElementById('rpmStatus').innerText = "PLAYING";
+      document.getElementById('rpmStatus').className = "text-emerald-400 font-bold animate-pulse";
+    } else {
+      document.getElementById('vinylRecord').classList.remove('spinning');
+      document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+      document.getElementById('statusText').innerText = isTrackLoaded ? "Drag Tonearm to Play Vinyl" : "No Record Loaded";
+      document.getElementById('rpmStatus').innerText = "STOPPED";
+      document.getElementById('rpmStatus').className = "text-amber-400 font-bold";
+    }
+  }
+
+  // Master Volume Control
+  document.getElementById('volumeSlider').addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (isYtReady && ytPlayer && typeof ytPlayer.setVolume === 'function') {
+      ytPlayer.setVolume(val);
+    }
+    if (directAudio) {
+      directAudio.volume = val / 100;
+    }
+    if (crackleGain && audioCtx) {
+      crackleGain.gain.setValueAtTime((val / 100) * 0.12, audioCtx.currentTime);
+    }
+  });
+
+  /* Synthesized Vinyl Crackle Effect */
+  function playCrackleSound() {
+    initAudioContext();
+    if (crackleNode) return;
+
+    const bufferSize = audioCtx.sampleRate * 2;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      if (Math.random() < 0.001) {
+        output[i] = (Math.random() * 2 - 1) * 0.8;
+      } else if (Math.random() < 0.01) {
+        output[i] = (Math.random() * 2 - 1) * 0.15;
+      } else {
+        output[i] = (Math.random() * 2 - 1) * 0.01;
+      }
+    }
+
+    crackleNode = audioCtx.createBufferSource();
+    crackleNode.buffer = noiseBuffer;
+    crackleNode.loop = true;
+
+    crackleGain = audioCtx.createGain();
+    const vol = document.getElementById('volumeSlider').value;
+    crackleGain.gain.value = (vol / 100) * 0.12;
+
+    crackleNode.connect(crackleGain);
+    crackleGain.connect(audioCtx.destination);
+    crackleNode.start();
+  }
+
+  function stopCrackleSound() {
+    if (crackleNode) {
+      crackleNode.stop();
+      crackleNode.disconnect();
+      crackleNode = null;
+    }
+  }
+
+  document.getElementById('crackleToggle').addEventListener('click', () => {
+    initAudioContext();
+    isCrackleEnabled = !isCrackleEnabled;
+    const statusEl = document.getElementById('crackleStatus');
+    const iconEl = document.getElementById('crackleIcon');
+
+    if (isCrackleEnabled) {
+      statusEl.innerText = "ON";
+      statusEl.className = "text-emerald-400 font-bold";
+      iconEl.classList.add('text-emerald-400');
+      if (isPlaying) playCrackleSound();
+    } else {
+      statusEl.innerText = "OFF";
+      statusEl.className = "text-gray-400";
+      iconEl.classList.remove('text-emerald-400');
+      stopCrackleSound();
+    }
+  });
+
+  /* ==========================================================================
+     6. YOUTUBE DATA API V3 SEARCH INTEGRATION
+     ========================================================================== */
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const searchResults = document.getElementById('searchResults');
+
+  async function searchYouTube(query) {
+    if (!query.trim()) return;
+
+    searchResults.classList.remove('hidden');
+    searchResults.innerHTML = `<div class="p-3 text-center text-xs text-gold-300"><i class="fa-solid fa-spinner animate-spin mr-2"></i>Searching YouTube Music...</div>`;
+
+    try {
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items && data.items.length > 0) {
+        searchResults.innerHTML = '';
+        data.items.forEach((item, i) => {
+          const videoId = item.id.videoId;
+          const title = item.snippet.title;
+          const artist = item.snippet.channelTitle;
+          const artwork = item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.default.url;
+
+          const div = document.createElement('div');
+          div.className = "p-2 hover:bg-burgundy-900 rounded-lg cursor-pointer flex items-center gap-3 transition border-b border-gold-500/10 last:border-none";
+          div.innerHTML = `
+            <img src="${artwork}" class="w-10 h-10 object-cover rounded shadow" alt="thumb">
+            <div class="flex-1 overflow-hidden">
+              <p class="text-xs font-semibold text-white truncate">${title}</p>
+              <p class="text-[10px] text-gold-300/70 truncate">${artist}</p>
+            </div>
+            <button class="gold-metallic text-burgundy-950 font-bold text-[10px] px-2 py-1 rounded">
+              + Add to Crate
+            </button>
+          `;
+
+          div.addEventListener('click', () => {
+            initAudioContext();
+            const newTrack = { 
+              id: videoId, 
+              title, 
+              artist, 
+              artwork,
+              streamUrl: AUDIO_STREAMS[i % AUDIO_STREAMS.length]
+            };
+            playlist.unshift(newTrack);
+            searchResults.classList.add('hidden');
+            searchInput.value = '';
+            renderCrate();
+            loadTrack(0, isTonearmOnRecord);
+          });
+
+          searchResults.appendChild(div);
+        });
+      } else {
+        searchResults.innerHTML = `<div class="p-3 text-center text-xs text-gray-400">No vinyl tracks found. Try another query.</div>`;
+      }
+    } catch (err) {
+      console.error("YouTube Search Error:", err);
+      searchResults.innerHTML = `<div class="p-3 text-center text-xs text-red-400">Error searching YouTube API. Please check network.</div>`;
+    }
+  }
+
+  searchBtn.addEventListener('click', () => searchYouTube(searchInput.value));
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchYouTube(searchInput.value);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target) && !searchBtn.contains(e.target)) {
+      searchResults.classList.add('hidden');
+    }
+  });
+
+  /* ==========================================================================
+     7. FULLSCREEN TOGGLE MODE & INITIALIZATION
+     ========================================================================== */
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+  fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.log(err));
+      fullscreenBtn.innerHTML = `<i class="fa-solid fa-compress"></i>`;
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        fullscreenBtn.innerHTML = `<i class="fa-solid fa-expand"></i>`;
+      }
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderCrate();
+    updateNowPlayingUI();
+    document.body.addEventListener('click', initAudioContext, { once: true });
+  });
+</script>
+
+</body>
+</html>
